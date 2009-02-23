@@ -33,7 +33,7 @@ if test $# = 0 ; then
   exit 1
 fi
 
-scriptname="$(readlink -n -e "$0")"
+scriptname="$(readlink -n -f "$0")"
 interpreter="lua"
 options=""
 
