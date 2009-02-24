@@ -496,6 +496,7 @@ function lunit.run()
     end
   end
   report("done")
+  return stats
 end
 traceback_hide(run)
 
@@ -504,6 +505,7 @@ function lunit.loadonly()
   clearstats()
   report("begin")
   report("done")
+  return stats
 end
 
 
