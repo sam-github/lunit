@@ -40,6 +40,7 @@ local ipairs          = ipairs
 local next            = next
 local type            = type
 local error           = error
+local tostring        = tostring
 
 local string_sub      = string.sub
 local string_format   = string.format
@@ -143,6 +144,18 @@ end
 traceback_hide( failure )
 
 
+local function format_arg(arg)
+  local argtype = type(arg)
+  if argtype == "string" then
+    return "'"..arg.."'"
+  elseif argtype == "number" or argtype == "boolean" or argtype == "nil" then
+    return tostring(arg)
+  else
+    return "["..tostring(arg).."]"
+  end
+end
+
+
 function fail(msg)
   stats.assertions = stats.assertions + 1
   failure( "fail", msg, "failure" )
@@ -191,7 +204,7 @@ traceback_hide( assert_false )
 function assert_equal(expected, actual, msg)
   stats.assertions = stats.assertions + 1
   if expected ~= actual then
-    failure( "assert_equal", msg, "expected '%s' but was '%s'", expected, actual )
+    failure( "assert_equal", msg, "expected %s but was %s", format_arg(expected), format_arg(actual) )
   end
   return actual
 end
@@ -201,7 +214,7 @@ traceback_hide( assert_equal )
 function assert_not_equal(unexpected, actual, msg)
   stats.assertions = stats.assertions + 1
   if unexpected == actual then
-    failure( "assert_not_equal", msg, "'%s' not expected but was one", unexpected )
+    failure( "assert_not_equal", msg, "%s not expected but was one", format_arg(unexpected) )
   end
   return actual
 end
@@ -210,11 +223,13 @@ traceback_hide( assert_not_equal )
 
 function assert_match(pattern, actual, msg)
   stats.assertions = stats.assertions + 1
-  if not is_string(pattern) then
-    failure( "assert_match", msg, "expected the pattern as a string but was '%s'", pattern )
+  local patterntype = type(pattern)
+  if patterntype ~= "string" then
+    failure( "assert_match", msg, "expected the pattern as a string but was a "..patterntype )
   end
-  if not is_string(actual) then
-    failure( "assert_match", msg, "expected a string to match pattern '%s' but was '%s'", pattern, actual )
+  local actualtype = type(actual)
+  if actualtype ~= "string" then
+    failure( "assert_match", msg, "expected a string to match pattern '%s' but was a %s", pattern, actualtype )
   end
   if not string.find(actual, pattern) then
     failure( "assert_match", msg, "expected '%s' to match pattern '%s' but doesn't", actual, pattern )
@@ -226,11 +241,13 @@ traceback_hide( assert_match )
 
 function assert_not_match(pattern, actual, msg)
   stats.assertions = stats.assertions + 1
-  if not is_string(pattern) then
-    failure( "assert_not_match", msg, "expected the pattern as a string but was '%s'", pattern )
+  local patterntype = type(pattern)
+  if patterntype ~= "string" then
+    failure( "assert_not_match", msg, "expected the pattern as a string but was a "..patterntype )
   end
-  if not is_string(actual) then
-    failure( "assert_not_match", msg, "expected a string to not match pattern '%s' but was '%s'", pattern, actual )
+  local actualtype = type(actual)
+  if actualtype ~= "string" then
+    failure( "assert_not_match", msg, "expected a string to not match pattern '%s' but was a %s", pattern, actualtype )
   end
   if string.find(actual, pattern) then
     failure( "assert_not_match", msg, "expected '%s' to not match pattern '%s' but it does", actual, pattern )
