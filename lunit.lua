@@ -7,7 +7,7 @@
 
     Author: Michael Roth <mroth@nessie.de>
 
-    Copyright (c) 2004, 2006-2008 Michael Roth <mroth@nessie.de>
+    Copyright (c) 2004, 2006-2009 Michael Roth <mroth@nessie.de>
 
     Permission is hereby granted, free of charge, to any person 
     obtaining a copy of this software and associated documentation
@@ -364,6 +364,9 @@ end
 
 
 
+local function key_iter(t, k)
+    return (next(t,k))
+end
 
 
 local testcase
@@ -394,7 +397,13 @@ do
 
   -- Iterator (testcasename) over all Testcases
   function lunit.testcases()
-    return next, _testcases, nil
+    -- Make a copy of testcases to prevent confusing the iterator when
+    -- new testcase are defined
+    local _testcases2 = {}
+    for k,v in pairs(_testcases) do
+        _testcases2[k] = true
+    end
+    return key_iter, _testcases2, nil
   end
 
   function testcase(tcname)
@@ -404,25 +413,13 @@ end
 
 
 do
-  local function filterednames(tcname, filter)
-    local function iter(tc, funcname)
-      local func
-      funcname, func = next(tc, funcname)
-      if funcname then
-        if is_string(funcname) and is_function(func) and filter(funcname) then
-          return funcname
-        else
-          return iter(tc, funcname)
-        end
-      end
-    end
-    return iter, testcase(tcname), nil
-  end
-
   -- Finds a function in a testcase case insensitiv
   local function findfuncname(tcname, name)
-    local iter, state, arg = filterednames(tcname, function(x) return string.lower(x) == name end)
-    return iter(state, arg)
+    for key, value in pairs(testcase(tcname)) do
+      if is_string(key) and is_function(value) and string.lower(key) == name then
+        return value
+      end
+    end
   end
 
   function lunit.setupname(tcname)
@@ -433,12 +430,20 @@ do
     return findfuncname(tcname, "teardown")
   end
 
-  -- Iterator over all test names in a testcase
-  function lunit.tests(tc)
-    return filterednames(tc, function(funcname)
-      local lfn = string.lower(funcname)
-      return string.sub(lfn, 1, 4) == "test" or string.sub(lfn, -4) == "test"
-    end)
+  -- Iterator over all test names in a testcase.
+  -- Have to collect the names first in case one of the test
+  -- functions creates a new global and throws off the iteration.
+  function lunit.tests(tcname)
+    local testnames = {}
+    for key, value in pairs(testcase(tcname)) do
+      if is_string(key) and is_function(value) then
+        local lfn = string.lower(key)
+        if string.sub(lfn, 1, 4) == "test" or string.sub(lfn, -4) == "test" then
+          testnames[key] = true
+        end
+      end
+    end
+    return key_iter, testnames, nil
   end
 end
 
@@ -463,11 +468,14 @@ function lunit.runtest(tcname, testname)
 
   report("run", tcname, testname)
 
-  local tc = testcase(tcname)
+  local tc          = testcase(tcname)
+  local setup       = tc[setupname(tcname)]
+  local test        = tc[testname]
+  local teardown    = tc[teardownname(tcname)]
 
-  local setup_ok    =              callit( "setup", tc[setupname(tcname)] )
-  local test_ok     = setup_ok and callit( "test", tc[testname] )
-  local teardown_ok = setup_ok and callit( "teardown", tc[teardownname(tcname)] )
+  local setup_ok    =              callit( "setup", setup )
+  local test_ok     = setup_ok and callit( "test", test )
+  local teardown_ok = setup_ok and callit( "teardown", teardown )
 
   if setup_ok and test_ok and teardown_ok then
     stats.passed = stats.passed + 1
