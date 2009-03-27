@@ -595,7 +595,7 @@ function main(argv)
     end
     local chunk, err = loadfile(filename)
     if err then
-      myerror(err)
+      return error(err)
     else
       chunk()
     end
