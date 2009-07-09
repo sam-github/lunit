@@ -274,6 +274,34 @@ end
 traceback_hide( assert_error )
 
 
+function assert_error_match(msg, pattern, func)
+  stats.assertions = stats.assertions + 1
+  if func == nil then
+    msg, pattern, func = nil, msg, pattern
+  end
+  local patterntype = type(pattern)
+  if patterntype ~= "string" then
+    failure( "assert_error_match", msg, "expected the pattern as a string but was a "..patterntype )
+  end
+  local functype = type(func)
+  if functype ~= "function" then
+    failure( "assert_error_match", msg, "expected a function as last argument but was a "..functype )
+  end
+  local ok, errmsg = pcall(func)
+  if ok then
+    failure( "assert_error_match", msg, "error expected but no error occurred" )
+  end
+  local errmsgtype = type(errmsg)
+  if errmsgtype ~= "string" then
+    failure( "assert_error_match", msg, "error as string expected but was a "..errmsgtype )
+  end
+  if not string.find(errmsg, pattern) then
+    failure( "assert_error_match", msg, "expected error '%s' to match pattern '%s' but doesn't", errmsg, pattern )
+  end
+end
+traceback_hide( assert_error_match )
+
+
 function assert_pass(msg, func)
   stats.assertions = stats.assertions + 1
   if func == nil then

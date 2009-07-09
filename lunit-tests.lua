@@ -61,7 +61,7 @@ function test()
     "assert_string", "assert_not_string", "assert_table", "assert_not_table",
     "assert_function", "assert_not_function", "assert_thread", "assert_not_thread",
     "assert_userdata", "assert_not_userdata", "assert_pass", "assert_error",
-    "fail", "clearstats",
+    "assert_error_match", "fail", "clearstats",
     "is_nil", "is_boolean", "is_number", "is_string", "is_table", "is_function",
     "is_thread", "is_userdata"
   }
@@ -127,6 +127,51 @@ function test_assert_error()
   ok, errmsg = pcall(function() assert_error("A Message", function() end) end)
   if ok then
     error("assert_error(\"A message\", <no error>) doesn't fail!")
+  end
+end
+
+function test_assert_error_match()
+  local ok, errmsg
+
+  local function errfunc()
+    error("Error!")
+  end
+
+  local errpattern = "Error!$"
+  local wrongpattern = "^_foobar_$"
+
+  local function goodfunc()
+    -- NOP
+  end
+
+  ok, errmsg = pcall(function() assert_error_match(errpattern, errfunc) end)
+  if not ok then
+    error("assert_error_match( <pattern>, <error> ) doesn't work!")
+  end
+
+  ok, errmsg = pcall(function() assert_error_match("A message", errpattern, errfunc) end)
+  if not ok then
+    error("assert_error_match(\"A message\", <pattern>, <error>) doesn't work!")
+  end
+
+  ok, errmsg = pcall(function() assert_error_match(wrongpattern, errfunc) end)
+  if ok then
+    error("assert_error_match( <wrong pattern>, <error> ) doesn't work!")
+  end
+
+  ok, errmsg = pcall(function() assert_error_match("A message", wrongpattern, errfunc) end)
+  if ok then
+    error("assert_error_match(\"A message\", <wrong pattern>, <error>) doesn't work!")
+  end
+
+  ok, errmsg = pcall(function() assert_error_match(errpattern, goodfunc) end)
+  if ok then
+    error("assert_error_match( <pattern>, <no error> ) doesn't fail!")
+  end
+
+  ok, errmsg = pcall(function() assert_error_match("A Message", errpatern, goodfunc) end)
+  if ok then
+    error("assert_error_match(\"A message\", <pattern>, <no error>) doesn't fail!")
   end
 end
 
