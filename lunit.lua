@@ -434,7 +434,7 @@ do
   local function findfuncname(tcname, name)
     for key, value in pairs(testcase(tcname)) do
       if is_string(key) and is_function(value) and string.lower(key) == name then
-        return value
+        return key
       end
     end
   end

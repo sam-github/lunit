@@ -919,3 +919,39 @@ function test_assert_not_match()
 
 end
 
+
+
+--
+-- Check if setup and teardown is called.
+--
+module( "lunit-tests.setup-teardown", lunit.testcase )
+
+local setup_called = 0
+local teardown_called = 0
+local helper_called = 0
+
+function setup()
+  setup_called = setup_called + 1
+end
+
+function Teardown()
+  teardown_called = teardown_called + 1
+end
+
+local function helper()
+  helper_called = helper_called + 1
+  assert(setup_called == helper_called, "setup() not called")
+  assert(teardown_called == helper_called - 1, "teardown() not called")
+end
+
+function test1()
+  helper()
+end
+
+function test2()
+  helper()
+end
+
+function test3()
+  helper()
+end
