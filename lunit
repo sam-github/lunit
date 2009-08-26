@@ -33,7 +33,11 @@ if test $# = 0 ; then
   exit 1
 fi
 
-scriptname="$(readlink -n -f "$0")"
+if [ `uname` = "Darwin" ]; then 
+  scriptname="$(readlink -n "$0")"
+else
+  scriptname="$(readlink -n -f "$0")"
+fi
 interpreter="lua"
 options=""
 
