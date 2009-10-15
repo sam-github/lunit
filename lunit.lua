@@ -338,14 +338,14 @@ end
 -- lunit.assert_not_typename functions
 
 for _, typename in ipairs(typenames) do
-  local assert_not_name = "assert_not_"..typename
-  lunit[assert_not_name] = function(actual, msg)
+  local assert_not_typename = "assert_not_"..typename
+  lunit[assert_not_typename] = function(actual, msg)
     stats.assertions = stats.assertions + 1
     if type(actual) == typename then
       failure( assert_not_typename, msg, typename.." not expected but was one" )
     end
   end
-  traceback_hide( lunit[assert_not_name] )
+  traceback_hide( lunit[assert_not_typename] )
 end
 
 
