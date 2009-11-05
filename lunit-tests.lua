@@ -7,9 +7,9 @@
 
     Author: Michael Roth <mroth@nessie.de>
 
-    Copyright (c) 2004, 2006-2008 Michael Roth <mroth@nessie.de>
+    Copyright (c) 2004, 2006-2009 Michael Roth <mroth@nessie.de>
 
-    Permission is hereby granted, free of charge, to any person   
+    Permission is hereby granted, free of charge, to any person
     obtaining a copy of this software and associated documentation
     files (the "Software"), to deal in the Software without restriction,
     including without limitation the rights to use, copy, modify, merge,
@@ -20,11 +20,11 @@
     The above copyright notice and this permission notice shall be 
     included in all copies or substantial portions of the Software.
 
-    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,   
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
     EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.    
-    IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY      
-    CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,      
+    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+    IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+    CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
     TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
     SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
@@ -130,51 +130,6 @@ function test_assert_error()
   end
 end
 
-function test_assert_error_match()
-  local ok, errmsg
-
-  local function errfunc()
-    error("Error!")
-  end
-
-  local errpattern = "Error!$"
-  local wrongpattern = "^_foobar_$"
-
-  local function goodfunc()
-    -- NOP
-  end
-
-  ok, errmsg = pcall(function() assert_error_match(errpattern, errfunc) end)
-  if not ok then
-    error("assert_error_match( <pattern>, <error> ) doesn't work!")
-  end
-
-  ok, errmsg = pcall(function() assert_error_match("A message", errpattern, errfunc) end)
-  if not ok then
-    error("assert_error_match(\"A message\", <pattern>, <error>) doesn't work!")
-  end
-
-  ok, errmsg = pcall(function() assert_error_match(wrongpattern, errfunc) end)
-  if ok then
-    error("assert_error_match( <wrong pattern>, <error> ) doesn't work!")
-  end
-
-  ok, errmsg = pcall(function() assert_error_match("A message", wrongpattern, errfunc) end)
-  if ok then
-    error("assert_error_match(\"A message\", <wrong pattern>, <error>) doesn't work!")
-  end
-
-  ok, errmsg = pcall(function() assert_error_match(errpattern, goodfunc) end)
-  if ok then
-    error("assert_error_match( <pattern>, <no error> ) doesn't fail!")
-  end
-
-  ok, errmsg = pcall(function() assert_error_match("A Message", errpatern, goodfunc) end)
-  if ok then
-    error("assert_error_match(\"A message\", <pattern>, <no error>) doesn't fail!")
-  end
-end
-
 function test_assert_pass()
   local ok, errmsg
 
@@ -223,7 +178,6 @@ function test_assert()
 end
 
 function test_assert_equal()
-
   assert_pass("assert_equal(\"A String\", \"A String\") doesn't work!", function()
     local a_string = assert_equal("A String", "A String")
     assert_true("A String" == a_string)
@@ -337,12 +291,10 @@ function test_assert_equal()
   assert_error("assert_equal(nil, false) \"A message\") doesn't fail!", function()
     assert_equal(nil, false, "A message")
   end)
-
 end
 
 
 function test_assert_not_equal()
-
   assert_pass("assert_not_equal(\"A String\", \"Another String\") doesn't work!", function()
     local a_string = assert_not_equal("A String", "Another String")
     assert_true("Another String" == a_string)
@@ -462,7 +414,6 @@ function test_assert_not_equal()
   assert_error("assert_not_equal(true, true, \"A message\") doesn't fail!", function()
     assert_not_equal(true, true, "A message")
   end)
-
 end
 
 
@@ -850,11 +801,9 @@ end
 
 
 
-
 module( "lunit-tests.match", lunit.testcase )
 
 function test_assert_match()
-
   assert_pass("assert_match(\"^Hello\", \"Hello World\") doesn't work!", function()
     local a_string = assert_match("^Hello", "Hello World")
     assert_equal("Hello World", a_string)
@@ -906,7 +855,6 @@ function test_assert_match()
   assert_error("assert_match(\"^World\", nil, \"A Message\") doesn't fail!", function()
     assert_match("^World", nil, "A message")
   end)
-
 end
 
 function test_assert_not_match()
@@ -961,14 +909,55 @@ function test_assert_not_match()
   assert_error("assert_not_match(\"^World\", nil, \"A Message\") doesn't fail!", function()
     assert_not_match("^World", nil, "A message")
   end)
+end
 
+function test_assert_error_match()
+  local ok, errobj, usrmsg
+
+  local function errfunc()
+    error("My Error!")
+  end
+
+  local errpattern = "Error!$"
+  local wrongpattern = "^_foobar_$"
+
+  local function goodfunc()
+    -- NOP
+  end
+
+  ok = pcall(function() assert_error_match(errpattern, errfunc) end)
+  assert_true(ok, "assert_error_match( <pattern>, <error> )")
+
+  ok = pcall(function() assert_error_match("A message", errpattern, errfunc) end)
+  assert_true(ok, "assert_error_match(\"A message\", <pattern>, <error>)")
+
+  usrmsg = "assert_error_match( <wrong pattern>, <error> )"
+  ok, errobj = pcall(function() assert_error_match(wrongpattern, errfunc) end)
+  assert_false(ok, usrmsg)
+  assert_table(errobj, usrmsg)
+  assert_match("expected error '.+: My Error!' to match pattern '"..wrongpattern.."' but doesn't$", errobj.msg, usrmsg)
+
+  usrmsg = "assert_error_match(\"A message\", <wrong pattern>, <error>)"
+  ok, errobj = pcall(function() assert_error_match("A message", wrongpattern, errfunc) end)
+  assert_false(ok, usrmsg)
+  assert_table(errobj, usrmsg)
+  assert_match("expected error '.+: My Error!' to match pattern '"..wrongpattern.."' but doesn't$", errobj.msg, usrmsg)
+
+  usrmsg = "assert_error_match( <pattern>, <no error> )"
+  ok, errobj = pcall(function() assert_error_match(errpattern, goodfunc) end)
+  assert_false(ok, usrmsg)
+  assert_table(errobj, usrmsg)
+  assert_match("error expected but no error occurred$", errobj.msg, usrmsg)
+
+  usrmsg = "assert_error_match(\"A message\", <pattern>, <no error>)"
+  ok, errobj = pcall(function() assert_error_match("A Message", errpattern, goodfunc) end)
+  assert_false(ok, usrmsg)
+  assert_table(errobj, usrmsg)
+  assert_match("error expected but no error occurred$", errobj.msg, usrmsg)
 end
 
 
 
---
--- Check if setup and teardown is called.
---
 module( "lunit-tests.setup-teardown", lunit.testcase )
 
 local setup_called = 0
