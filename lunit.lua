@@ -458,7 +458,7 @@ end
 
 
 do
-  -- Finds a function in a testcase case insensitiv
+  -- Finds a function in a testcase case insensitive
   local function findfuncname(tcname, name)
     for key, value in pairs(testcase(tcname)) do
       if is_string(key) and is_function(value) and string.lower(key) == name then
