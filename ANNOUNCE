@@ -1,10 +1,10 @@
 
-                 Lunit Release 0.4
+                 Lunit Release 0.5
                 ===================
 
 Lunit is a unit testing framework for lua, written in lua. 
 
-Lunit provides 26 assert functions, and a few misc functions
+Lunit provides 27 assert functions, and a few misc functions
 for usage in an easy unit testing framework.
 
 Lunit comes with a test suite to test itself. The testsuite
