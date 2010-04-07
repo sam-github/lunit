@@ -531,13 +531,15 @@ traceback_hide(runtest)
 
 
 
-function lunit.run()
+function lunit.run(testpatterns)
   clearstats()
   report("begin")
   for testcasename in lunit.testcases() do
     -- Run tests in the testcases
     for testname in lunit.tests(testcasename) do
+if selected(testpatterns, testname) then
       runtest(testcasename, testname)
+end
     end
   end
   report("done")
@@ -578,7 +580,10 @@ do
     ["*"] = ".*"
   }
   function lunitpat2luapat(str)
-    return "^" .. string.gsub(str, "%W", conv) .. "$"
+    --return "^" .. string.gsub(str, "%W", conv) .. "$"
+    -- Above was very annoying, if I want to run all the tests having to do with
+    -- RSS, I want to be able to do "-t rss"   not "-t \*rss\*".
+    return string.gsub(str, "%W", conv)
   end
 end
 
@@ -597,7 +602,17 @@ local function in_patternmap(map, name)
   return false
 end
 
+function selected(map, name)
+    if not map then
+        return true
+    end
 
+    local m = {}
+    for k,v in pairs(map) do
+        m[k] = lunitpat2luapat(v)
+    end
+    return in_patternmap(m, name)
+end
 
 
 
