@@ -1,3 +1,7 @@
+Extended lunit, see README.lunitx.
+
+--
+
 This is lunit Version 0.5.
 
 Lunit is a unit testing framework for lua.

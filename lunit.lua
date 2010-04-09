@@ -663,6 +663,24 @@ function main(argv)
       checkarg(optname, arg)
       testpatterns = testpatterns or {}
       testpatterns[#testpatterns+1] = arg
+    elseif arg == "--help" or arg == "-h" then
+        print[[
+lunit 0.5
+Copyright (c) 2004-2009 Michael Roth <mroth@nessie.de>
+This program comes WITHOUT WARRANTY OF ANY KIND.
+
+Usage: lua test [OPTIONS] [--] scripts
+
+Options:
+
+  -r, --runner RUNNER         Testrunner to use, defaults to 'lunit-console'.
+  -t, --test PATTERN          Which tests to run, may contain * or ? wildcards.
+      --loadonly              Only load the tests.
+  -h, --help                  Print this help screen.
+
+Please report bugs to <mroth@nessie.de>.
+]]
+        return
     elseif arg == "--" then
       while i < #argv do
         i = i + 1; arg = argv[i]
