@@ -1,4 +1,4 @@
-Notes on lunitx, extensions to lunit.
+Notes on the extensions to lunit found at <http://github.com/sam-github/lunit>.
 
 I fixed the -t switch for selecting only a single test, it didn't seem to be
 completely implemented, and annoyingly forced you to match the entire test
@@ -41,5 +41,4 @@ or just listing them all
 
 
 YMMV, hope you like it.
-
 
