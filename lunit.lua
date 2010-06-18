@@ -156,6 +156,19 @@ local function format_arg(arg)
 end
 
 
+local function selected(map, name)
+    if not map then
+        return true
+    end
+
+    local m = {}
+    for k,v in pairs(map) do
+        m[k] = lunitpat2luapat(v)
+    end
+    return in_patternmap(m, name)
+end
+
+
 function fail(msg)
   stats.assertions = stats.assertions + 1
   failure( "fail", msg, "failure" )
@@ -601,19 +614,6 @@ local function in_patternmap(map, name)
   end
   return false
 end
-
-function selected(map, name)
-    if not map then
-        return true
-    end
-
-    local m = {}
-    for k,v in pairs(map) do
-        m[k] = lunitpat2luapat(v)
-    end
-    return in_patternmap(m, name)
-end
-
 
 
 
