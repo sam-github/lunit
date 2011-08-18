@@ -13,7 +13,7 @@ function test_success()
 end
 
 function test_failure()
-  assert_true( false, "This test always fails!")
+  assert_true( "Hello World!", "This test always fails!")
 end
 
 

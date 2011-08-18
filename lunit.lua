@@ -7,7 +7,7 @@
 
     Author: Michael Roth <mroth@nessie.de>
 
-    Copyright (c) 2004, 2006-2009 Michael Roth <mroth@nessie.de>
+    Copyright (c) 2004, 2006-2010 Michael Roth <mroth@nessie.de>
 
     Permission is hereby granted, free of charge, to any person 
     obtaining a copy of this software and associated documentation
@@ -31,8 +31,6 @@
 --]]--------------------------------------------------------------------------
 
 
-
-
 local orig_assert     = assert
 
 local pairs           = pairs
@@ -41,16 +39,16 @@ local next            = next
 local type            = type
 local error           = error
 local tostring        = tostring
+local setmetatable    = setmetatable
 local pcall           = pcall
 local xpcall          = xpcall
 local require         = require
-local setmetatable    = setmetatable
 
 local string_sub      = string.sub
-local string_format   = string.format
-local string_find     = string.find
-local string_lower    = string.lower
 local string_gsub     = string.gsub
+local string_format   = string.format
+local string_lower    = string.lower
+local string_find     = string.find
 
 local table_concat    = table.concat
 
@@ -76,7 +74,6 @@ end
 local __failure__ = {}    -- Type tag for failed assertions
 
 local typenames = { "nil", "boolean", "number", "string", "table", "function", "thread", "userdata" }
-
 
 
 local traceback_hide      -- Traceback function which hides lunit internals
@@ -211,12 +208,8 @@ traceback_hide( assert )
 
 function assert_true(actual, msg)
   stats.assertions = stats.assertions + 1
-  local actualtype = type(actual)
-  if actualtype ~= "boolean" then
-    failure( "assert_true", msg, "true expected but was a "..actualtype )
-  end
   if actual ~= true then
-    failure( "assert_true", msg, "true expected but was false" )
+    failure( "assert_true", msg, "true expected but was %s", format_arg(actual) )
   end
   return actual
 end
@@ -225,12 +218,8 @@ traceback_hide( assert_true )
 
 function assert_false(actual, msg)
   stats.assertions = stats.assertions + 1
-  local actualtype = type(actual)
-  if actualtype ~= "boolean" then
-    failure( "assert_false", msg, "false expected but was a "..actualtype )
-  end
   if actual ~= false then
-    failure( "assert_false", msg, "false expected but was true" )
+    failure( "assert_false", msg, "false expected but was %s", format_arg(actual) )
   end
   return actual
 end
@@ -259,13 +248,11 @@ traceback_hide( assert_not_equal )
 
 function assert_match(pattern, actual, msg)
   stats.assertions = stats.assertions + 1
-  local patterntype = type(pattern)
-  if patterntype ~= "string" then
-    failure( "assert_match", msg, "expected the pattern as a string but was a "..patterntype )
+  if type(pattern) ~= "string" then
+    failure( "assert_match", msg, "expected a string as pattern but was %s", format_arg(pattern) )
   end
-  local actualtype = type(actual)
-  if actualtype ~= "string" then
-    failure( "assert_match", msg, "expected a string to match pattern '%s' but was a %s", pattern, actualtype )
+  if type(actual) ~= "string" then
+    failure( "assert_match", msg, "expected a string to match pattern '%s' but was a %s", pattern, format_arg(actual) )
   end
   if not string_find(actual, pattern) then
     failure( "assert_match", msg, "expected '%s' to match pattern '%s' but doesn't", actual, pattern )
@@ -277,13 +264,11 @@ traceback_hide( assert_match )
 
 function assert_not_match(pattern, actual, msg)
   stats.assertions = stats.assertions + 1
-  local patterntype = type(pattern)
-  if patterntype ~= "string" then
-    failure( "assert_not_match", msg, "expected the pattern as a string but was a "..patterntype )
+  if type(pattern) ~= "string" then
+    failure( "assert_not_match", msg, "expected a string as pattern but was %s", format_arg(pattern) )
   end
-  local actualtype = type(actual)
-  if actualtype ~= "string" then
-    failure( "assert_not_match", msg, "expected a string to not match pattern '%s' but was a %s", pattern, actualtype )
+  if type(actual) ~= "string" then
+    failure( "assert_not_match", msg, "expected a string to not match pattern '%s' but was %s", pattern, format_arg(actual) )
   end
   if string_find(actual, pattern) then
     failure( "assert_not_match", msg, "expected '%s' to not match pattern '%s' but it does", actual, pattern )
@@ -298,9 +283,8 @@ function assert_error(msg, func)
   if func == nil then
     func, msg = msg, nil
   end
-  local functype = type(func)
-  if functype ~= "function" then
-    failure( "assert_error", msg, "expected a function as last argument but was a "..functype )
+  if type(func) ~= "function" then
+    failure( "assert_error", msg, "expected a function as last argument but was %s", format_arg(func) )
   end
   local ok, errmsg = pcall(func)
   if ok then
@@ -315,21 +299,18 @@ function assert_error_match(msg, pattern, func)
   if func == nil then
     msg, pattern, func = nil, msg, pattern
   end
-  local patterntype = type(pattern)
-  if patterntype ~= "string" then
-    failure( "assert_error_match", msg, "expected the pattern as a string but was a "..patterntype )
+  if type(pattern) ~= "string" then
+    failure( "assert_error_match", msg, "expected the pattern as a string but was %s", format_arg(pattern) )
   end
-  local functype = type(func)
-  if functype ~= "function" then
-    failure( "assert_error_match", msg, "expected a function as last argument but was a "..functype )
+  if type(func) ~= "function" then
+    failure( "assert_error_match", msg, "expected a function as last argument but was %s", format_arg(func) )
   end
   local ok, errmsg = pcall(func)
   if ok then
     failure( "assert_error_match", msg, "error expected but no error occurred" )
   end
-  local errmsgtype = type(errmsg)
-  if errmsgtype ~= "string" then
-    failure( "assert_error_match", msg, "error as string expected but was a "..errmsgtype )
+  if type(errmsg) ~= "string" then
+    failure( "assert_error_match", msg, "error as string expected but was %s", format_arg(errmsg) )
   end
   if not string_find(errmsg, pattern) then
     failure( "assert_error_match", msg, "expected error '%s' to match pattern '%s' but doesn't", errmsg, pattern )
@@ -343,9 +324,8 @@ function assert_pass(msg, func)
   if func == nil then
     func, msg = msg, nil
   end
-  local functype = type(func)
-  if functype ~= "function" then
-    failure( "assert_pass", msg, "expected a function as last argument but was a %s", functype )
+  if type(func) ~= "function" then
+    failure( "assert_pass", msg, "expected a function as last argument but was %s", format_arg(func) )
   end
   local ok, errmsg = pcall(func)
   if not ok then
@@ -361,9 +341,8 @@ for _, typename in ipairs(typenames) do
   local assert_typename = "assert_"..typename
   lunit[assert_typename] = function(actual, msg)
     stats.assertions = stats.assertions + 1
-    local actualtype = type(actual)
-    if actualtype ~= typename then
-      failure( assert_typename, msg, typename.." expected but was a "..actualtype )
+    if type(actual) ~= typename then
+      failure( assert_typename, msg, "%s expected but was %s", typename, format_arg(actual) )
     end
     return actual
   end
@@ -417,6 +396,10 @@ do
       return error("lunit.loadrunner: Can't load test runner: "..runner, 0)
     end
     return setrunner(runner)
+  end
+
+  function lunit.getrunner()
+    return testrunner
   end
 
   function report(event, ...)
@@ -545,6 +528,10 @@ function lunit.runtest(tcname, testname)
   orig_assert( is_string(tcname) )
   orig_assert( is_string(testname) )
 
+  if (not getrunner()) then
+    loadrunner("lunit.console")
+  end
+
   local function callit(context, func)
     if func then
       local err = mypcall(func)
@@ -583,9 +570,9 @@ function lunit.run(testpatterns)
   for testcasename in lunit.testcases() do
     -- Run tests in the testcases
     for testname in lunit.tests(testcasename) do
-if selected(testpatterns, testname) then
-      runtest(testcasename, testname)
-end
+      if selected(testpatterns, testname) then
+        runtest(testcasename, testname)
+      end
     end
   end
   report("done")
@@ -652,6 +639,9 @@ end
 
 
 
+
+
+
 -- Called from 'lunit' shell script.
 
 function main(argv)
@@ -679,7 +669,6 @@ function main(argv)
 
   local testpatterns = nil
   local doloadonly = false
-  local runner = nil
 
   local i = 0
   while i < #argv do
@@ -690,7 +679,7 @@ function main(argv)
     elseif arg == "--runner" or arg == "-r" then
       local optname = arg; i = i + 1; arg = argv[i]
       checkarg(optname, arg)
-      runner = arg
+      loadrunner(arg)
     elseif arg == "--test" or arg == "-t" then
       local optname = arg; i = i + 1; arg = argv[i]
       checkarg(optname, arg)
@@ -723,8 +712,6 @@ Please report bugs to <mroth@nessie.de>.
       loadtestcase(arg)
     end
   end
-
-  loadrunner(runner or "lunit-console")
 
   if doloadonly then
     return loadonly()

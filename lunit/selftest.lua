@@ -31,8 +31,20 @@
 --]]--------------------------------------------------------------------------
 
 
-lunit = require "lunitx"
+local lunit = require "lunitx"
 
+lunit.console = require "lunit.console"
+
+if _VERSION >= 'Lua 5.2' then 
+
+    lunit.selftest = lunit.module("lunit.selftest","seeall")
+    _ENV = lunit.selftest
+    
+else
+
+    module("lunit.selftest", package.seeall)
+    
+end
 
 local a_number    = 123
 local a_string    = "A string"
@@ -57,13 +69,13 @@ else
     
 end
 
-module( "lunit-tests.interface", lunit.testcase )
 
+module( "lunit.selftest.interface", lunit.testcase )
 
 function test()
   local funcnames = {
     "main", "run", "runtest", "testcase", "testcases", "tests", "setupname",
-    "teardownname", "loadrunner", "setrunner", "loadonly",
+    "teardownname", "loadrunner", "setrunner", "getrunner", "loadonly",
     "assert", "assert_true", "assert_false", "assert_equal", "assert_not_equal",
     "assert_match", "assert_not_match", "assert_nil", "assert_not_nil",
     "assert_boolean", "assert_not_boolean", "assert_number", "assert_not_number",
@@ -75,18 +87,29 @@ function test()
     "is_thread", "is_userdata", "module"
   }
 
+  local tablenames = {
+    "stats", "console", "selftest"
+  }
+
+  assert_table(lunit, "Missing lunit namespace")
+
   for _, funcname in ipairs(funcnames) do
     assert_function( lunit[funcname], "Public function missing: "..funcname )
   end
 
-  assert_table( lunit.stats, "Statistic table missing" )
+  for _, tablename in ipairs(tablenames) do
+    assert_table( lunit[tablename], "Public table missing: "..tablename)
+  end
 
   do
     local map = {}
     for _, name in ipairs(funcnames) do
       map[name] = true
     end
-    for _, name in ipairs{"lunit", "_PACKAGE", "_M", "_NAME", "stats"} do
+    for _, name in ipairs(tablenames) do
+      map[name] = true
+    end
+    for _, name in ipairs{"_PACKAGE", "_M", "_NAME"} do
       map[name] = true
     end
     for name, _ in pairs(lunit) do
@@ -99,7 +122,7 @@ end
 
 -- We must assume that errors thrown by test functions are detected. We use
 -- the stdlib error() function to signal errors instead of fail().
-module( "lunit-tests.basics", lunit.testcase )
+module( "lunit.selftest.basics", lunit.testcase )
 
 function test_fail()
   local ok, errmsg
@@ -427,7 +450,7 @@ end
 
 
 
-module( "lunit-tests.is_xyz", lunit.testcase )
+module( "lunit.selftest.is_xyz", lunit.testcase )
 
 function test_is_nil()
   assert_true( is_nil(nil) )
@@ -508,7 +531,7 @@ end
 
 
 
-module( "lunit-tests.assert_not_xyz", lunit.testcase )
+module( "lunit.selftest.assert_not_xyz", lunit.testcase )
 
 function test_assert_not_nil()
   assert_not_nil( true )
@@ -659,7 +682,7 @@ end
 
 
 
-module( "lunit-tests.assert_xyz", lunit.testcase )
+module( "lunit.selftest.assert_xyz", lunit.testcase )
 
 function test_assert_nil()
   assert_nil( nil )
@@ -810,7 +833,7 @@ end
 
 
 
-module( "lunit-tests.match", lunit.testcase )
+module( "lunit.selftest.match", lunit.testcase )
 
 function test_assert_match()
   assert_pass("assert_match(\"^Hello\", \"Hello World\") doesn't work!", function()
@@ -967,7 +990,7 @@ end
 
 
 
-module( "lunit-tests.setup-teardown", lunit.testcase )
+module( "lunit.selftest.setup-teardown", lunit.testcase )
 
 local setup_called = 0
 local teardown_called = 0

@@ -1,3 +1,8 @@
+Next release:
+
+	Lunit no longer depends on lunit.sh. The script moved to the
+	extra-directory.
+
 Release 0.5:
 
 	New test function assert_error_match().
