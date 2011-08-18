@@ -1,8 +1,17 @@
 local _assert = assert
 
-require"lunitx"
+local lunit = require "lunitx"
 
-module("down", lunit.testcase)
+if _VERSION >= 'Lua 5.2' then 
+
+    _ENV = lunit.module('down') -- note no ('down','seeall')
+    
+else
+
+    module("down", lunit.testcase)
+    
+end
+
 
 function testluaerror()
     (nil)() -- error!

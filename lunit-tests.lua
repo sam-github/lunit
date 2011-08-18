@@ -31,7 +31,7 @@
 --]]--------------------------------------------------------------------------
 
 
-require "lunit"
+lunit = require "lunitx"
 
 
 local a_number    = 123
@@ -45,11 +45,20 @@ local error       = error
 local pairs       = pairs
 local ipairs      = ipairs
 
-local module      = module
+local module      -- = module
 
+if _VERSION >= 'Lua 5.2' then 
 
+    module = function (name, unk) _ENV = lunit.module(name) end
+    
+else
+
+    module = _G.module
+    
+end
 
 module( "lunit-tests.interface", lunit.testcase )
+
 
 function test()
   local funcnames = {
@@ -63,7 +72,7 @@ function test()
     "assert_userdata", "assert_not_userdata", "assert_pass", "assert_error",
     "assert_error_match", "fail", "clearstats",
     "is_nil", "is_boolean", "is_number", "is_string", "is_table", "is_function",
-    "is_thread", "is_userdata"
+    "is_thread", "is_userdata", "module"
   }
 
   for _, funcname in ipairs(funcnames) do

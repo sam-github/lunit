@@ -41,14 +41,37 @@ local next            = next
 local type            = type
 local error           = error
 local tostring        = tostring
+local pcall           = pcall
+local xpcall          = xpcall
+local require         = require
+local setmetatable    = setmetatable
 
 local string_sub      = string.sub
 local string_format   = string.format
+local string_find     = string.find
+local string_lower    = string.lower
+local string_gsub     = string.gsub
 
+local table_concat    = table.concat
 
-module("lunit", package.seeall)     -- FIXME: Remove package.seeall
+local debug_getinfo   = debug.getinfo
 
-local lunit = _M
+local _G = _G
+
+local lunit
+
+if _VERSION >= 'Lua 5.2' then 
+
+    lunit = {}
+    _ENV = lunit
+    
+else
+
+    module("lunit")
+    lunit = _M
+    
+end
+
 
 local __failure__ = {}    -- Type tag for failed assertions
 
@@ -67,14 +90,14 @@ do
 
   local function my_traceback(errobj)
     if is_table(errobj) and errobj.type == __failure__ then
-      local info = debug.getinfo(5, "Sl")   -- FIXME: Hardcoded integers are bad...
+      local info = debug_getinfo(5, "Sl")   -- FIXME: Hardcoded integers are bad...
       errobj.where = string_format( "%s:%d", info.short_src, info.currentline)
     else
       errobj = { msg = tostring(errobj) }
       errobj.tb = {}
       local i = 2
       while true do
-        local info = debug.getinfo(i, "Snlf")
+        local info = debug_getinfo(i, "Snlf")
         if not is_table(info) then
           break
         end
@@ -95,7 +118,7 @@ do
               line[#line+1] = string_format(" in function <%s:%d>", info.short_src, info.linedefined)
             end
           end
-          errobj.tb[#errobj.tb+1] = table.concat(line)
+          errobj.tb[#errobj.tb+1] = table_concat(line)
         end
         i = i + 1
       end
@@ -244,7 +267,7 @@ function assert_match(pattern, actual, msg)
   if actualtype ~= "string" then
     failure( "assert_match", msg, "expected a string to match pattern '%s' but was a %s", pattern, actualtype )
   end
-  if not string.find(actual, pattern) then
+  if not string_find(actual, pattern) then
     failure( "assert_match", msg, "expected '%s' to match pattern '%s' but doesn't", actual, pattern )
   end
   return actual
@@ -262,7 +285,7 @@ function assert_not_match(pattern, actual, msg)
   if actualtype ~= "string" then
     failure( "assert_not_match", msg, "expected a string to not match pattern '%s' but was a %s", pattern, actualtype )
   end
-  if string.find(actual, pattern) then
+  if string_find(actual, pattern) then
     failure( "assert_not_match", msg, "expected '%s' to not match pattern '%s' but it does", actual, pattern )
   end
   return actual
@@ -308,7 +331,7 @@ function assert_error_match(msg, pattern, func)
   if errmsgtype ~= "string" then
     failure( "assert_error_match", msg, "error as string expected but was a "..errmsgtype )
   end
-  if not string.find(errmsg, pattern) then
+  if not string_find(errmsg, pattern) then
     failure( "assert_error_match", msg, "expected error '%s' to match pattern '%s' but doesn't", errmsg, pattern )
   end
 end
@@ -452,6 +475,16 @@ do
       end
     end
   end
+  
+  function lunit.module(name,seeall)
+    local m = {}
+    if seeall == "seeall" then
+      setmetatable(m, { __index = _G })
+    end
+    m._NAME = name
+    lunit.testcase(m)
+    return m
+  end
 
   -- Iterator (testcasename) over all Testcases
   function lunit.testcases()
@@ -474,7 +507,7 @@ do
   -- Finds a function in a testcase case insensitive
   local function findfuncname(tcname, name)
     for key, value in pairs(testcase(tcname)) do
-      if is_string(key) and is_function(value) and string.lower(key) == name then
+      if is_string(key) and is_function(value) and string_lower(key) == name then
         return key
       end
     end
@@ -495,8 +528,8 @@ do
     local testnames = {}
     for key, value in pairs(testcase(tcname)) do
       if is_string(key) and is_function(value) then
-        local lfn = string.lower(key)
-        if string.sub(lfn, 1, 4) == "test" or string.sub(lfn, -4) == "test" then
+        local lfn = string_lower(key)
+        if string_sub(lfn, 1, 4) == "test" or string_sub(lfn, -4) == "test" then
           testnames[key] = true
         end
       end
@@ -596,7 +629,7 @@ do
     --return "^" .. string.gsub(str, "%W", conv) .. "$"
     -- Above was very annoying, if I want to run all the tests having to do with
     -- RSS, I want to be able to do "-t rss"   not "-t \*rss\*".
-    return string.gsub(str, "%W", conv)
+    return string_gsub(str, "%W", conv)
   end
 end
 
@@ -607,7 +640,7 @@ local function in_patternmap(map, name)
     return true
   else
     for _, pat in ipairs(map) do
-      if string.find(name, pat) then
+      if string_find(name, pat) then
         return true
       end
     end
@@ -701,3 +734,5 @@ Please report bugs to <mroth@nessie.de>.
 end
 
 clearstats()
+
+return lunit

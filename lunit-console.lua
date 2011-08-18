@@ -49,9 +49,22 @@
 --]]
 
 
-require "lunit"
+lunit = require "lunit"
 
-module( "lunit-console", package.seeall )
+local lunit_console
+
+if _VERSION >= 'Lua 5.2' then 
+
+    lunit_console = setmetatable({},{__index = _ENV})
+    _ENV = lunit_console
+    
+else
+
+    module( "lunit-console", package.seeall )
+    lunit_console = _M
+    
+end
+
 
 
 local function printformat(format, ...)
@@ -81,6 +94,8 @@ local msgs = {}
 function begin()
   local total_tc = 0
   local total_tests = 0
+  
+  msgs = {} -- e
 
   for tcname in lunit.testcases() do
     total_tc = total_tc + 1
@@ -136,6 +151,6 @@ function done()
 end
 
 
-
+return lunit_console
 
 

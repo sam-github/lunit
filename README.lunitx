@@ -1,3 +1,15 @@
+
+Notes on the extensions to lunit found at <http://github.com/dcurrie/lunit>
+
+Starting with Sam's fork, described below, I added support for Lua 5.2.
+
+Since Lua 5.2 has no module function, I added a lunit.module that serves the 
+same purpose. For examples of its use, see up.lua, down.lua, and lunit-tests.lua
+
+The update has been tested with Lua 5.1.4, Lua 5.2-beta, and LuaJIT 2.0.0-beta8
+
+-- -- -- -- -- -- -- -- -- -- -- 
+
 Notes on the extensions to lunit found at <http://github.com/sam-github/lunit>.
 
 I fixed the -t switch for selecting only a single test, it didn't seem to be

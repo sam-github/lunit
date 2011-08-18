@@ -1,5 +1,5 @@
-require"atexit"
-require"lunit"
+local atexit = require "atexit"
+local lunit = require "lunit"
 
 --for k,v in pairs(debug.getinfo(1,"S")) do print(k,v) end
 -- autonameing
@@ -15,3 +15,4 @@ atexit(function()
     end
 end)
 
+return lunit
