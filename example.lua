@@ -1,9 +1,12 @@
 
-require "lunit"
+lunit = require "lunitx"
 
 
-
-module( "simple", package.seeall, lunit.testcase )
+if _VERSION >= 'Lua 5.2' then 
+    _ENV = lunit.module('simple','seeall')
+else
+    module( "simple", package.seeall, lunit.testcase )
+end
 
 function test_success()
   assert_true( true, "This test never fails.")
@@ -14,8 +17,11 @@ function test_failure()
 end
 
 
-
-module( "enhanced", package.seeall, lunit.testcase )
+if _VERSION >= 'Lua 5.2' then 
+    _ENV = lunit.module('enhanced','seeall')
+else
+    module( "enhanced", package.seeall, lunit.testcase )
+end
 
 local foobar = nil
 
