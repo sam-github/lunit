@@ -1,7 +1,14 @@
-Next release:
+Release 0.6:
 
 	Lunit no longer depends on lunit.sh. The script moved to the
 	extra-directory.
+        See README.lunitx for Sam Roberts's enhancments:
+        - fixed the -t switch for selecting only a single test
+        - example files for using Lunit without the wrapper script
+        Support for Lua 5.2 using lunit.module.
+        Tests added and examples modified for lunit.module
+        Bug fixes by Reuben Thomas, Joshua Haberman, and Ildar Mulyukov
+        Debian packaging by Ricky Cormier
 
 Release 0.5:
 

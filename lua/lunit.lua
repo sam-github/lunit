@@ -1,12 +1,14 @@
 --[[--------------------------------------------------------------------------
 
-    This file is part of lunit 0.5.
+    This file is part of lunit 0.6.
 
     For Details about lunit look at: http://www.mroth.net/lunit/
+    For Details about lunitx look at: https://github.com/dcurrie/lunit
 
     Author: Michael Roth <mroth@nessie.de>
 
     Copyright (c) 2004, 2006-2010 Michael Roth <mroth@nessie.de>
+    Copyright (c) 2011-2012 Doug Currie
 
     Permission is hereby granted, free of charge, to any person
     obtaining a copy of this software and associated documentation
@@ -687,8 +689,9 @@ function main(argv)
       testpatterns[#testpatterns+1] = arg
     elseif arg == "--help" or arg == "-h" then
         print[[
-lunit 0.5
-Copyright (c) 2004-2009 Michael Roth <mroth@nessie.de>
+lunit 0.6
+Copyright (c) 2004-2010 Michael Roth <mroth@nessie.de>
+Copyright (c) 2011-2012 Doug Currie
 This program comes WITHOUT WARRANTY OF ANY KIND.
 
 Usage: lua test [OPTIONS] [--] scripts
